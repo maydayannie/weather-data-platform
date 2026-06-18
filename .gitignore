@@ -1,0 +1,18 @@
+# .gitignore
+
+# 1. 忽略 Python 的虛擬環境與快取
+venv/
+__pycache__/
+*.pyc
+
+# 2. 絕對不能上傳的敏感環境變數金鑰
+.env
+
+# 3. 忽略本地的 DuckDB 資料庫檔案（我們只上傳程式碼，不傳資料庫本身）
+*.duckdb
+*.duckdb.wal
+
+# 4. 忽略 dbt 執行時產生的暫存與編譯檔案
+dbt_weather/dbt_packages/
+dbt_weather/logs/
+dbt_weather/target/

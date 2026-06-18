@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: stg_weather
+    description: "經過增量清洗與單位轉換後的天氣監測資料表"
+    columns:
+      - name: city
+        description: "觀測的城市名稱"
+        tests:
+          - not_null       # 核心測試 1：城市名稱絕對不能是空值（Null）
+
+      - name: observation_time
+        description: "天氣資料的標準觀測時間"
+        tests:
+          - not_null       # 核心測試 2：觀測時間不能是空值
+
+      - name: temperature_celsius
+        description: "轉換後的攝氏溫度"
+        tests:
+          - not_null       # 核心測試 3：溫度不能是空值
+          - dbt_utils.accepted_range:
+                 arguments:
+                   min_value: -30
+                   max_value: 32
+
+          

@@ -15,7 +15,7 @@ SELECT
     END AS alert_level,
 
     CASE 
-        WHEN city IN ('Taipei', 'Xizhi', 'Banqiao') THEN '台灣本土 (Taiwan)'
-        ELSE '海外國際 (International)'
+        WHEN city IN ('Taipei', 'Xizhi', 'Banqiao') THEN 'Taiwan'
+        ELSE 'International'
     END AS region_type
 FROM current_weather

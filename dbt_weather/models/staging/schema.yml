@@ -1,5 +1,16 @@
 version: 2
 
+sources:
+  - name: src_weather
+    description: "OpenWeather API 抓回來的原始數據"
+    database: local_weather
+    schema: main
+    tables:
+      - name: raw_weather_data
+        description: "即時天氣原始事實表"
+      - name: raw_pollution_data
+        description: "即時空污原始事實表"
+
 models:
   - name: stg_weather
     description: "經過增量清洗與單位轉換後的天氣監測資料表"

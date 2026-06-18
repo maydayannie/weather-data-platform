@@ -11,71 +11,102 @@ if not API_KEY:
     raise ValueError("Can't find OPENWEATHER_API_KEY，please check .env file！")
 
 #2. Define the cities we want to fetch weather data for
-CITIES = ["Taipei,tw", "Xizhi,tw", "Banqiao,tw", "Tokyo,jp", "London,gb"]
+CITIES = ["Taipei,tw", "Xizhi,tw", "Banqiao,tw", "Kaohsiung,tw", "Bangkok,th", "Pattaya,th", "Tokyo,jp", "London,gb"]
 
-def fetch_real_weather():
-    weather_data_list = []
-    
-    print("Fetch weather data from OpenWeather API...")
+def fetch_weather_and_pollution():
+    weather_list = []
+    pollution_list = []
 
-    for city in CITIES:
-        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}"
-        
-        print(f"Try to connect to: {url}")
+    print("Start from OpenWeather fetch weather and air pollution data.")
+
+    for city_query in CITIES:
+         # 1. Call weather API to get city coordinates (lat, lon)
+        weather_url = f"https://api.openweathermap.org/data/2.5/weather?q={city_query}&appid={API_KEY}"
+        print(f"Fetching weather data for....: {city_query}")
 
         try:
-            response = requests.get(url, timeout=5)
+            w_res = requests.get(weather_url, timeout=5)
+            if w_res.status_code != 200:
+                print(f"Weather data fetch failed for {city_query}: {w_res.text}")
+                continue
 
-            if response.status_code == 200:
-                data = response.json()
-                
-                weather_entry = {
-                    "city": data["name"],
-                    "weather": data["weather"][0]["main"],
-                    "temp_k": data["main"]["temp"],      # Raw data is (Kelvin)
-                    "dt": data["dt"]                    
+            w_data = w_res.json()
+            city_name = w_data["name"]  
+            lat = w_data["coord"]["lat"]
+            lon = w_data["coord"]["lon"]
+
+            weather_entry = {
+                "city": city_name,
+                "weather": w_data["weather"][0]["main"],
+                "temp_k": w_data["main"]["temp"],
+                "dt": w_data["dt"]
+            }
+            weather_list.append(weather_entry)
+
+            # 2. Call air pollution API 
+            pollution_url = f"http://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
+            print(f"Fetching air pollution data for {city_name} ({lat}, {lon})")
+
+            p_res = requests.get(pollution_url, timeout=5)
+            if p_res.status_code == 200:
+                p_data = p_res.json()
+                p_main = p_data["list"][0]
+
+                pollution_entry = {
+                    "city": city_name,
+                    "aqi": p_main["main"]["aqi"],            # 1-5 空氣品質指數
+                    "pm2_5": p_main["components"]["pm2_5"],  # PM2.5 濃度
+                    "pm10": p_main["components"]["pm10"],    # PM10 濃度
+                    "dt": p_main["dt"]                       # 空污觀測時間戳記
                 }
-                weather_data_list = weather_data_list + [weather_entry]
-                print(f"✅ Successfully fetched {data['name']}: {weather_entry['weather']}, {weather_entry['temp_k']}K")
+                pollution_list.append(pollution_entry)
             else:
-                print(f"❌ Failed to fetch weather data for city {city}, Status Code: {response.status_code}")
-
-        except requests.exceptions.Timeout:
-                print(f"【連線逾時】呼叫 {city} 時網路超時 5 秒，OpenWeather 伺服器沒回應！")
+                print(f"Air pollution data fetch failed {city_name}: {p_res.text}")
         except requests.exceptions.RequestException as e:
-                print(f"【網路異常】發生未知錯誤: {e}")
+                print(f"🚨 網路連線異常: {e}")
 
-    return weather_data_list
+    return weather_list, pollution_list
 
-def save_to_duckdb(data):
-    if not data:
-        print("⚠️ No data fetched, canceling database write.")
-        return
-    
+
+def save_to_duckdb(weather_data, pollution_data):
     conn = duckdb.connect("local_weather.duckdb")
 
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS main.raw_weather_data (
-            city VARCHAR,
-            weather VARCHAR,
-            temp_k DOUBLE,
-            dt BIGINT
-        )
-    """)
-
-    # Truncate old raw table before inserting new data
-    conn.execute("TRUNCATE main.raw_weather_data")
-
-    # batch insert new data
-    for row in data:
+    # A table: Insert weather data into main.raw_weather_data
+    if weather_data:
         conn.execute("""
-            INSERT INTO main.raw_weather_data VALUES (?, ?, ?, ?)
-        """, (row["city"], row["weather"], row["temp_k"], row["dt"]))
-        
+            CREATE TABLE IF NOT EXISTS main.raw_weather_data (
+                city VARCHAR, 
+                weather VARCHAR, 
+                temp_k DOUBLE, 
+                dt BIGINT
+            )
+        """)
+        conn.execute("TRUNCATE main.raw_weather_data")
+        for row in weather_data:
+            conn.execute("INSERT INTO main.raw_weather_data VALUES (?, ?, ?, ?)", 
+                         (row["city"], row["weather"], row["temp_k"], row["dt"]))
+        print("Weather data successfully inserted into main.raw_weather_data")
+
+    # B table: Insert pollution data into main.raw_pollution_data
+    if pollution_data:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS main.raw_pollution_data (
+                city VARCHAR, 
+                aqi INTEGER, 
+                pm2_5 DOUBLE, 
+                pm10 DOUBLE,
+                dt BIGINT
+            )
+        """)
+        conn.execute("TRUNCATE main.raw_pollution_data")
+        for row in pollution_data:
+            conn.execute("INSERT INTO main.raw_pollution_data VALUES (?, ?, ?, ?, ?)", 
+                         (row["city"], row["aqi"], row["pm2_5"], row["pm10"], row["dt"]))
+        print("Air pollution data successfully inserted into main.raw_pollution_data")
+
     conn.close()
-    print("💾 Successfully inserted latest data into raw_weather_data table!")
+
 
 if __name__ == "__main__":
-    raw_data = fetch_real_weather()
-    save_to_duckdb(raw_data)
-
+    weather_res, pollution_res = fetch_weather_and_pollution()
+    save_to_duckdb(weather_res, pollution_res)

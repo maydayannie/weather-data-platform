@@ -22,10 +22,10 @@ final_insights as (
     select
         *,
         case 
-            when weather_alert = '🟢 Comfortable' and air_quality_index <= 2 
+            when weather_alert = 'Comfortable' and air_quality_index <= 2 
                 then 'Perfect for Outdoor Sports! '
             when air_quality_index >= 4 
-                then '😷 Warning: Stay Indoors! '
+                then 'Warning: Stay Indoors! '
             else 'Acceptable for Casual Walk! '
         end as outdoor_activity_index
     from joined

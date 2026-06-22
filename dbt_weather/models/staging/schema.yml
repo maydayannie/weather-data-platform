@@ -2,33 +2,33 @@ version: 2
 
 sources:
   - name: src_weather
-    description: "OpenWeather API 抓回來的原始數據"
+    description: "Raw data fetched directly from OpenWeather API"
     database: local_weather
     schema: main
     tables:
       - name: raw_weather_data
-        description: "即時天氣原始事實表"
+        description: "Raw real-time weather data fact table"
       - name: raw_pollution_data
-        description: "即時空污原始事實表"
+        description: "Raw real-time air pollution data fact table"
 
 models:
   - name: stg_weather
-    description: "經過增量清洗與單位轉換後的天氣監測資料表"
+    description: "Staging table for weather monitoring data with incremental cleaning and unit conversion"
     columns:
       - name: city
-        description: "觀測的城市名稱"
+        description: "Name of the observed city"
         tests:
-          - not_null       # 核心測試 1：城市名稱絕對不能是空值（Null）
+          - not_null       # Core Test 1: City name must not be null
 
       - name: observation_time
-        description: "天氣資料的標準觀測時間"
+        description: "Standard observation time for weather data"
         tests:
-          - not_null       # 核心測試 2：觀測時間不能是空值
+          - not_null       # Core Test 2: Observation time must not be null
 
       - name: temperature_celsius
-        description: "轉換後的攝氏溫度"
+        description: "Converted temperature in Celsius"
         tests:
-          - not_null       # 核心測試 3：溫度不能是空值
+          - not_null       # Core Test 3: Temperature must not be null
           - dbt_utils.accepted_range:
                  arguments:
                    min_value: -30

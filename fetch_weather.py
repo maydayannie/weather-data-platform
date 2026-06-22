@@ -54,10 +54,10 @@ def fetch_weather_and_pollution():
 
                 pollution_entry = {
                     "city": city_name,
-                    "aqi": p_main["main"]["aqi"],            # 1-5 空氣品質指數
-                    "pm2_5": p_main["components"]["pm2_5"],  # PM2.5 濃度
-                    "pm10": p_main["components"]["pm10"],    # PM10 濃度
-                    "dt": p_main["dt"]                       # 空污觀測時間戳記
+                    "aqi": p_main["main"]["aqi"],            # 1-5 Air Quality Index
+                    "pm2_5": p_main["components"]["pm2_5"],  # PM2.5 concentration
+                    "pm10": p_main["components"]["pm10"],    # PM10 concentration
+                    "dt": p_main["dt"]                       # Air pollution observation timestamp
                 }
                 pollution_list.append(pollution_entry)
             else:

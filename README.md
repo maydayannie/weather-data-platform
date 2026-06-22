@@ -207,8 +207,8 @@ The final fact table joins weather alerts with pollution data to generate an act
 
 | Condition | Recommendation |
 |---|---|
-| Alert = 🟢 Comfortable **AND** AQI ≤ 2 | Perfect for Outdoor Sports! |
-| AQI ≥ 4 | 😷 Warning: Stay Indoors! |
+| Alert = Comfortable **AND** AQI ≤ 2 | Perfect for Outdoor Sports! |
+| AQI ≥ 4 | Warning: Stay Indoors! |
 | All other cases | Acceptable for Casual Walk! |
 
 ### 5. Historical Tracking — `scd_weather_snapshot`
@@ -344,10 +344,9 @@ Open `http://localhost:3000` in your browser. From the Dagster UI you can:
 Connect to DuckDB to inspect the final tables:
 
 ```bash
-python -c "
-import duckdb
-con = duckdb.connect('local_weather.duckdb')
-print(con.sql('SELECT * FROM fct_global_weather_pollution').df())
-"
-```
+# Open the database using the DuckDB CLI
+duckdb local_weather.duckdb
 
+# Run the query to check the final integrated weather and pollution table
+SELECT * FROM main.fct_global_weather_pollution;
+```

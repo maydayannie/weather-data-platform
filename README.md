@@ -252,9 +252,13 @@ dbt docs serve
 Opens the docs site at `http://localhost:8080`. The site includes:
 
 - **Lineage graph** — interactive DAG from raw sources through staging to marts and snapshot
+<img width="1338" height="730" alt="image" src="https://github.com/user-attachments/assets/bf71e2a6-12f0-4103-8087-e6247fdbca81" />
+
 - **Model pages** — materialization strategy, description, column-level metadata, and tests for each model
 - **Source freshness** — tracks when `raw_weather_data` and `raw_pollution_data` were last loaded
 - **Test results** — which `not_null` and `accepted_range` assertions are attached to each column
+<img width="1360" height="761" alt="image" src="https://github.com/user-attachments/assets/cf63cf36-93df-43a2-aa52-eb90ee210b7a" />
+
 
 ### Documented models
 
@@ -350,3 +354,4 @@ duckdb local_weather.duckdb
 # Run the query to check the final integrated weather and pollution table
 SELECT * FROM main.fct_global_weather_pollution;
 ```
+<img width="915" height="326" alt="image" src="https://github.com/user-attachments/assets/bdce2f72-0f4e-4fd0-aa3f-6b89bb756313" />

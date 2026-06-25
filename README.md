@@ -341,7 +341,11 @@ Open `http://localhost:3000` in your browser. From the Dagster UI you can:
 
 - Materialize all assets on demand
 - Enable the `weather_daily_9am_schedule` for automated daily runs
+<img width="822" height="341" alt="image" src="https://github.com/user-attachments/assets/be1b5dd2-3dba-4b9f-aab3-33c4255f483d" />
+
 - Inspect asset lineage, run logs, and partition history
+<img width="1461" height="775" alt="image" src="https://github.com/user-attachments/assets/95b73b20-43f0-41d6-9dfa-45f38a6171a7" />
+
 
 ### 6. Verify Output
 
